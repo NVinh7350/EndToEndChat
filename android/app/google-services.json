@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "246352642326",
+    "firebase_url": "https://endtoendchat-5f93e-default-rtdb.firebaseio.com",
+    "project_id": "endtoendchat-5f93e",
+    "storage_bucket": "endtoendchat-5f93e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:246352642326:android:ab6b4055f83daa8251d037",
+        "android_client_info": {
+          "package_name": "com.endtoendchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "246352642326-53nagfv8ug4bjl21s5cjihi4tq8mbthk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqPi9GsESrdmjLGmJe2_ftfeH8pnEEjIA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "246352642326-53nagfv8ug4bjl21s5cjihi4tq8mbthk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
