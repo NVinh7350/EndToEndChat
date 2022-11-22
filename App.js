@@ -4,11 +4,14 @@ import { initializeApp, getApp, getApps } from "firebase/app";
 import firestore from "@react-native-firebase/firestore";
 import { app } from './src/firebase/firebase-config';
 import auth from "@react-native-firebase/auth";
+import Index from './src/navigations';
+import store from './src/redux/store'
+import { Provider } from 'react-redux';
 const App = () => {
   return (
-    <View>
-      <Text>App</Text>
-    </View>
+    <Provider store={store}>
+      <Index/>
+    </Provider>
   )
 }
 
