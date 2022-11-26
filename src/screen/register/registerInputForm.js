@@ -7,17 +7,17 @@ import { useDispatch, useSelector } from 'react-redux'
 import loginSlice, { onLogin, onRegister } from '../login/loginInputSlice'
 import auth from '@react-native-firebase/auth'
 import { app } from '../../firebase/firebase-config'
-import {  loginDataSelector, statusSelector, uidSelector } from '../../redux/selector'
+import {  loginDataSelector, statusRegisterSelector, uidSelector } from '../../redux/selector'
 import Loader from '../../components/Loader'
 const RegisterInputForm = ({ navigation }) => {
     const [registerData, setRegisterData] = useState({
         userName:'Vinh2310',
-        email:'vanvinhqn2310@gmail.com',
+        email:'vanvinhqn2310@ail.com',
         password:'123456',
         comfirmPassword:'123456'
     });
     const [showPW, setShowPW] = useState(true);
-    const status = useSelector(statusSelector);
+    const statusRegister = useSelector(statusRegisterSelector);
     const newUser = useSelector(loginDataSelector);
     const dispath = useDispatch(); 
     
@@ -25,87 +25,108 @@ const RegisterInputForm = ({ navigation }) => {
       setRegisterData({...registerData, [key]: value})
     }
     const checkRegisterData = (data) => {
-      const check = data?.userName && data?.email && data?.password && data?.comfirmPassword;
-      console.log(check);
+		const validateEmail = (email) => 
+		{
+			let regex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}');
+			return regex.test(email)
+		}
+      	const check = data?.userName && data?.email && data?.password && data?.comfirmPassword && true;
+      	if (!check)
+		{
+			Alert.alert('Lỗi!', 'Vui lòng điền đủ thông tin');
+			return false;
+		} else if (!validateEmail(data?.email)){
+			Alert.alert('Lỗi!', 'Định dạng email không chính xác');
+			return false;
+		} else if (data?.password !== data?.comfirmPassword) {
+			Alert.alert('Lỗi!', 'Mật khẩu và nhập lại mật khẩu không khớp');
+			return false;
+		}
+		else 
+			return true;
     }
 
     const handleRegister = () => {
-      if(checkRegisterData(registerData))
-          dispath(onRegister(registerData))
+		if(checkRegisterData(registerData))
+			{
+				dispath(onRegister(registerData))
+			}
     }
 
-    checkRegisterData(registerData);
+    
 
     useEffect(() =>{
-      if(status == 'error') {
+      if(statusRegister == 'error') {
         Alert.alert('Lỗi!', 'Tài khoản đã tồn tại', [
-          {text: 'OK', onPress: () => dispath(loginSlice.actions.setStatus('idle')), style: 'OK'}
+          {text: 'OK', onPress: () => dispath(loginSlice.actions.setStatusRegister('idle')), style: 'OK'}
         ])
-      } else if (status == 'success') {
-        dispath(loginSlice.actions.setStatus('idle'));
-        navigation.goBack();
+      } else if (statusRegister == 'success') {
+        dispath(loginSlice.actions.setStatusRegister('idle'));
+		Alert.alert('Đăng ký thành công', 'Bạn có muốn quay về đăng nhập?',[
+			{text:'Có', onPress: () => navigation.goBack()},
+			{text:'Không', onPress: () => {}}
+		])
       }
-    }, [status])
-    console.log(status)
+    }, [statusRegister])
 
     return (
     <View style={styles.container}>
-      <Loader status={status}/>
-      <Text style={styles.textTitleSmall}>Đăng ký</Text>
-      <InputField 
-      containerStyle={{marginVertical: HEIGHT * 0.02}}
-      leftIcon={{
-            name: 'account',
-        }}
-      placeholder={'User name'}
-      value= {registerData.userName}
-      onChangeText= {(e) => addRegisterData('userName',e)}
-      />
-      <InputField 
-      containerStyle={{marginVertical: HEIGHT * 0.02}}
-      leftIcon={{
-            name: 'email',
-        }}
-      placeholder={'Email'}
-      value= {registerData.email}
-      onChangeText= {(e) => addRegisterData('email',e)}
-      />
-      <InputField 
-      containerStyle={{marginVertical: HEIGHT * 0.02}}
-      leftIcon={{
-            name: 'key',
-        }}
-      placeholder={'Password'}
-      value= {registerData.password}
-      onChangeText= {(e) => addRegisterData('password',e)}
-      rightIcon={{
-            name: showPW ? 'eye-off' : 'eye'
-      }}
-      secureTextEntry = {showPW}
-      onRightIconPress={() => setShowPW(!showPW)}
-      />
-      <InputField 
-      textInputStyle={{marginLeft:-WIDTH *0.05}}
-      containerStyle={{marginVertical: HEIGHT * 0.02,justifyContent:'space-around' }}
-      leftIcon={{
-            name: 'key',
-        }}
-      placeholder={'Confirm Password'}
-      value= {registerData.comfirmPassword}
-      onChangeText= {(e) => addRegisterData('comfirmPassword',e)}
-      secureTextEntry = {showPW}
-      />
-      <ButtonField
-      containerStyle={{marginVertical: HEIGHT * 0.02}}
-      textContent={'Đăng ký'}
-      onPress={() => handleRegister()}
-      />
-      <Text style={[styles.text, {textAlign:'center'}]}
-      onPress={()=> navigation.navigate('Login')}>
-        Đăng nhập tài khoản đã có
-      </Text>
-      {/* <Text>{uid}</Text>
-      <Text>{status}</Text> */}
+		<Loader status={statusRegister}/>
+		<Text style={styles.textTitleSmall}>Đăng ký</Text>
+		<InputField 
+		containerStyle={{marginVertical: HEIGHT * 0.02}}
+		leftIcon={{
+				name: 'account',
+			}}
+		placeholder={'User name'}
+		value= {registerData.userName}
+		onChangeText= {(e) => addRegisterData('userName',e)}
+		/>
+		<InputField 
+		containerStyle={{marginVertical: HEIGHT * 0.02}}
+		leftIcon={{
+				name: 'email',
+			}}
+		placeholder={'Email'}
+		value= {registerData.email}
+		onChangeText= {(e) => addRegisterData('email',e)}
+		/>
+		<InputField 
+		containerStyle={{marginVertical: HEIGHT * 0.02}}
+		leftIcon={{
+				name: 'key',
+			}}
+		placeholder={'Password'}
+		value= {registerData.password}
+		onChangeText= {(e) => addRegisterData('password',e)}
+		rightIcon={{
+				name: showPW ? 'eye-off' : 'eye'
+		}}
+		secureTextEntry = {showPW}
+		onRightIconPress={() => setShowPW(!showPW)}
+		/>
+		<InputField 
+		textInputStyle={{marginLeft:-WIDTH *0.05}}
+		containerStyle={{marginVertical: HEIGHT * 0.02,justifyContent:'space-around' }}
+		leftIcon={{
+				name: 'key',
+			}}
+		placeholder={'Confirm Password'}
+		value= {registerData.comfirmPassword}
+		onChangeText= {(e) => addRegisterData('comfirmPassword',e)}
+		secureTextEntry = {showPW}
+		/>
+		<ButtonField
+		containerStyle={{marginVertical: HEIGHT * 0.02}}
+		textContent={'Đăng ký'}
+		onPress={() => handleRegister()}
+		/>
+		<Text style={[styles.text, {textAlign:'center'}]}
+		onPress={()=> navigation.navigate('Login')}>
+			Đăng nhập tài khoản đã có
+		</Text>
+		{/* <Text>{uid}</Text>
+		<Text>{status}</Text> */}
     </View>
   )
 }
@@ -128,11 +149,11 @@ const styles = StyleSheet.create({
         fontWeight:'bold'
     },
     textTitleSmall: {
-      width: WIDTH * 0.9,
-      marginBottom: HEIGHT * 0.02,
-      textAlign:'left',
-      fontSize: 25,
-      fontWeight: 'bold',
-      color: colors.BLACK,
+		width: WIDTH * 0.9,
+		marginBottom: HEIGHT * 0.02,
+		textAlign:'left',
+		fontSize: 25,
+		fontWeight: 'bold',
+		color: colors.BLACK,
   },
 })

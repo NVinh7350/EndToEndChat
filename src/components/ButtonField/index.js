@@ -9,14 +9,16 @@ const ButtonField = ({
     textStyle,
     buttonStyle,
     containerStyle,
-    onPress
+    onPress,
+    disabled
 }) => {
   return (
     // <View style={[styles.container, containerStyle]}>
         <TouchableOpacity style={[styles.container, containerStyle]}
         onPress={onPress}
+        disabled={disabled}
         >
-        <View style={styles.insideContainer}>
+        <View style={[styles.insideContainer, buttonStyle]}>
             {icon ? 
             <Icon style={[styles.icon, iconStyle]}
                 name={icon?.name}

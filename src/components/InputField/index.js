@@ -6,6 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 const InputField = ({
     leftIcon,
     rightIcon,
+    onLeftIconPress,
     onRightIconPress,
     value,
     onChangeText,
@@ -13,16 +14,22 @@ const InputField = ({
     placeholder,
     textInputStyle,
     containerStyle,
-    
+    onFocus,
+    leftExpandedIcon
 }) => {
   return (
     <View style={[styles.container, containerStyle]}>
-        <Icon style={styles.leftIcon}
+        {leftExpandedIcon?
+            leftExpandedIcon
+            :
+            <Icon style={styles.leftIcon}
             name={leftIcon?.name}
             size={leftIcon?.size ? leftIcon?.size: 20 }
             color={leftIcon?.color ? leftIcon?.color : 'gray'}
-        ></Icon>
+            ></Icon>
+        }
         <TextInput 
+            onFocus={onFocus}
             secureTextEntry = {secureTextEntry}
             style={[styles.textInput, textInputStyle]}
             placeholder={placeholder}
