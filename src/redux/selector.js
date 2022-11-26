@@ -50,7 +50,7 @@ export const checkFriendSelector = createSelector(
         return result;
     }
 )
-
+export const statusInvitationSelector = (state) => state.invitations.status;
 export const allInvitationsSelector = (state) => state.invitations.allInvitations;
 export const checkInvitationSelector = createSelector(
     allInvitationsSelector, guestSelector,

@@ -32,12 +32,13 @@ const HeaderComponent = ({navigation}) =>{
             onPress={()=> navigation.navigate('Seach')}
             >
                 <View style={styles.search}>
-                    <Icon
-                    name='search'
-                    size={20}
-                    ></Icon>
-                    <Text style={{fontSize:16, width:WIDTH*0.7}}>Tìm kiếm</Text>
-                </View>
+                <Icon
+                  name='search'
+                  size={20}
+                  color={colors.GRAY_DARK}
+                  ></Icon>
+                  <Text style={{fontSize:16, width:WIDTH*0.7, color: colors.GRAY_DARK}}>Tìm kiếm</Text>
+              </View>
             </TouchableWithoutFeedback>
         </View>
     )

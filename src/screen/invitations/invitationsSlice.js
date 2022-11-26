@@ -15,7 +15,7 @@ const invitationsSlice = createSlice({
             state.status = action.payload;
         },
         setInvitation: (state, action) => {
-            state.guest = action.payload;
+            state.invitation = action.payload;
         }
     },
     extraReducers:(buider) => {
@@ -32,17 +32,11 @@ const invitationsSlice = createSlice({
         .addCase(sendInvitation.rejected, (state, action) =>{
             state.status = 'error';
             state.invitation = action.payload;
-            console.log('send Error')
+            console.log('send Error', action.error.message)
         })
         .addCase(getAllInvitations.fulfilled , (state, action) =>{
             state.status = 'success';
             state.allInvitations = action.payload; 
-            console.log('getAllInvitations success');
-            try{
-                console.log(action.payload.length)
-            } catch(err){
-                console.log(err)
-            }
         })
         .addCase(getAllInvitations.pending, (state, action) =>{
             state.status = 'loading'
@@ -50,9 +44,19 @@ const invitationsSlice = createSlice({
         .addCase(getAllInvitations.rejected, (state, action) =>{
             state.status = 'error';
             state.allInvitations = action.payload;
-            console.log('send Error');
-            console.log(action.error.message)
+            console.log('getAllInvitations',action.error.message)
         })
+        .addCase(acceptInvitation.pending, (state, action) =>{
+            state.status = 'loading';
+        })
+        .addCase(acceptInvitation.fulfilled, (state, action) =>{
+            state.status = 'success';
+        })
+        .addCase(acceptInvitation.rejected, (state, action) =>{
+            state.status = 'error';
+            console.log('acceptInvitation', action.error.message);
+        })
+
     }
 })
 
@@ -79,7 +83,7 @@ export const sendInvitation = createAsyncThunk('invitations/sendInvitation',
 async() => {
     const owner = JSON.parse(await getAsyncStorage('owner'));
     const guest = JSON.parse(await getAsyncStorage('guest'));
-    // const timeSend = fireStore.FieldValue.serverTimestamp();
+    const invitationId = fireStore(app).collection('invitation').doc().id;
     const timeSend = Date.now();
     const privateKey = await getAsyncStorage('privateKey');
     const publicKey = privateKey;// Tính khoá công khai tại đây 
@@ -90,20 +94,69 @@ async() => {
           'UO6wqwixH6vEzePZ0TVZ' :  publicKey
         },
         status: 'sent',
-        time: timeSend
+        time: timeSend,
+        invitationId: invitationId
       }
-    const invitation = await fireStore(app).collection('invitations').add(invitationData)
+    const invitation = await fireStore(app).collection('invitations').doc(invitationId).set(invitationData)
     await fireStore(app).collection('users').doc(owner.uid).update({
-      [`invitations.${invitation.id}`] : timeSend
+      [`invitations.${invitationId}`] : timeSend
     })
     await fireStore(app).collection('users').doc(guest.uid).update({
-      [`invitations.${invitation.id}`] : timeSend
+      [`invitations.${invitationId}`] : timeSend
     })
     return invitationData;
 })
 
 export const acceptInvitation = createAsyncThunk('invitations/acceptInvitation', 
-async() => {
-    
+async(invitation) => {
+    const messageId = fireStore(app).collection('m').doc().id;
+    const guestId = invitation?.sentBy?.uid;
+    const ownerId = invitation?.receivedBy?.uid;
+    const invitationId = invitation?.invitationId;
+    const privateKey = await getAsyncStorage('privateKey');
+    const publicKey = privateKey;// Tính khoá công khai tại đây 
+    const timeAccept = Date.now();
+    await fireStore(app).collection('invitations').doc(invitationId).update({
+        [`publicKey.${ownerId}`] : publicKey,
+        status :'accepted',
+        time : timeAccept
+    })
+    await fireStore(app).collection('users').doc(ownerId).update({
+    // recivedInvitations : fireStore.FieldValue.arrayUnion(invitation.id)
+    [`invitations.${invitationId}`] : timeAccept
+    })  
+    await fireStore(app).collection('users').doc(guestId).update({
+    // sentInvitations : fireStore.FieldValue.arrayUnion(invitation.id)
+    [`invitations.${invitationId}`] : timeAccept
+    })
+    const getPublicKey = await fireStore(app).collection('invitations').doc(invitationId).get();
+    const chatRoom = await fireStore(app).collection('chats').add({
+    publicKey : getPublicKey.data().publicKey,
+    lastMessage : {
+        messageContent: 'Room has been created',
+        messageTime: timeAccept,
+        recivedBy: guestId,
+        sentBy: ownerId
+    },
+    members: [ownerId, guestId]
+    });
+    await fireStore(app).collection('users').doc(ownerId).update({
+        // recivedInvitations : fireStore.FieldValue.arrayUnion(invitation.id)
+        [`chats.${chatRoom.id}`] : timeAccept
+    })
+    await fireStore(app).collection('users').doc(guestId).update({
+    // sentInvitations : fireStore.FieldValue.arrayUnion(invitation.id)
+        [`chats.${chatRoom.id}`] : timeAccept
+    })
+    await fireStore(app).collection('messages').doc(chatRoom.id).set({
+        [`${messageId}`] : {
+          messageContent: 'Room has been created',
+          messageTime: timeAccept,
+          recivedBy: guestId,
+          sentBy: ownerId,
+          publicKey : getPublicKey.data().publicKey,
+        }
+    })
+    return getPublicKey.data().publicKey;
 }
 )

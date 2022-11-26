@@ -55,7 +55,6 @@ const EncryptSetting = ({navigation}) => {
         if(settingStatus == 'success') {
             SimpleToast.show('Cài đặt thành công', 1000 )
             dispatch(settingSlice.actions.setStatus('idle'))
-            Alert.alert('key',typeof privateKey)
         } else if (settingStatus == 'error') {
             SimpleToast.show('Cài đặt thất bại', 1000)
             dispatch(settingSlice.actions.setStatus('idle'))

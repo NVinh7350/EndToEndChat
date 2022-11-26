@@ -35,6 +35,7 @@ const InputField = ({
             placeholder={placeholder}
             value={value}
             onChangeText={onChangeText}
+            placeholderTextColor={colors.GRAY_DARK}
         ></TextInput>
         <Icon style={{}}
             name={rightIcon?.name}

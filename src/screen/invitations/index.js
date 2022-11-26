@@ -6,7 +6,7 @@ import { colors, HEIGHT, WIDTH } from '../../utility';
 import CircleImage from '../../components/CircleImage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch, useSelector } from 'react-redux';
-import { allInvitationsSelector, encryptKeySelector, encryptPasswordSelector, ownerSelector, receivedInvitationsSelector } from '../../redux/selector';
+import { allInvitationsSelector, encryptKeySelector, encryptPasswordSelector, ownerSelector, receivedInvitationsSelector, statusInvitationSelector } from '../../redux/selector';
 import { getAsyncStorage } from '../../asyncStorage';
 import fireStore from '@react-native-firebase/firestore'
 import {app} from '../../firebase/firebase-config'
@@ -14,6 +14,8 @@ import { setEncryptKey, setEncryptPassword } from '../setting/settingSlice';
 import PopUp from '../../components/PopUp';
 import InvitationItem from '../../components/InvitationItem';
 import { setGuest } from '../search/searchSlice';
+import invitationsSlice, { acceptInvitation } from './invitationsSlice';
+import Loader from '../../components/Loader';
 let navigations;
 
 const HeaderComponent = ({navigation}) =>{
@@ -36,8 +38,9 @@ const HeaderComponent = ({navigation}) =>{
                   <Icon
                   name='search'
                   size={20}
+                  color={colors.GRAY_DARK}
                   ></Icon>
-                  <Text style={{fontSize:16, width:WIDTH*0.7}}>Tìm kiếm</Text>
+                  <Text style={{fontSize:16, width:WIDTH*0.7, color: colors.GRAY_DARK}}>Tìm kiếm</Text>
               </View>
           </TouchableWithoutFeedback>
       </View>
@@ -46,14 +49,14 @@ const HeaderComponent = ({navigation}) =>{
 const Invitation = ({invitation}) => {
     const dispatch = useDispatch();
     const handleAccept = () => {
-
+        dispatch(acceptInvitation(invitation));
     }
     const handleRefuse = () => {
 
     } 
     const handleOpenProfile = () => {
-        dispatch(setGuest(invitation?.sentBy));
-        navigations.navigate('Profile');
+        // dispatch(setGuest(invitation?.sentBy));
+        // navigations.navigate('Profile');
     }
     return (
         <InvitationItem userName={invitation?.sentBy?.userName}
@@ -68,9 +71,18 @@ const Invitations = ({navigation}) => {
     navigations = navigation;
     const allInvitations = useSelector(allInvitationsSelector);
     const receivedInvitations = useSelector(receivedInvitationsSelector);
-    console.log(receivedInvitations)
+    const statusInvitation = useSelector(statusInvitationSelector);
+    const dispatch = useDispatch();
+    useEffect(() => {
+        if(statusInvitation == 'success') {
+            dispatch(invitationsSlice.actions.setStatus('idle'));
+        } else if (statusInvitation == 'error') {
+            dispatch(invitationsSlice.actions.setStatus('idle'));
+        }
+    })
   return (
     <View>
+        <Loader status={statusInvitation}/>
         <HeaderComponent navigation={navigation}/>
         <FlatList
         data={receivedInvitations}
