@@ -21,7 +21,6 @@ const ItemListSearch = ({user}) => {
         userName={user.userName}
         state={'Sleep'}
         lastMessage={user.email}
-        timeMessage={''}
         seen= {true}
         source={user?.profileImg ? {uri: user?.profileImg} : require('../../utility/image/profileImg.png')}
         // source={{uri: user.profileImg ? user.profileImg : require('../../utility/image/profileImg.png')}}

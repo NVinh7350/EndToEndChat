@@ -9,6 +9,11 @@ import { ownerSelector, statusLoginSelector, statusSelector } from '../../redux/
 import ChatItem from '../../components/ChatItem'
 import loginSlice, { onLogin, onLogOut } from '../login/loginInputSlice'
 import Loader from '../../components/Loader'
+import searchSlice from '../search/searchSlice'
+import chatsSlice from '../chats/chatsSlice'
+import settingSlice from './settingSlice'
+import invitationsSlice from '../invitations/invitationsSlice'
+import chatRoomSlice from '../chatRoom/chatRoomSlice'
 
 const Setting = ({navigation}) => {
     const owner = useSelector(ownerSelector)
@@ -30,6 +35,12 @@ const Setting = ({navigation}) => {
     }
 
     const logOut = () => {
+        dispatch(searchSlice.actions.clearState());
+        dispatch(chatsSlice.actions.clearState());
+        dispatch(settingSlice.actions.clearState());
+        dispatch(loginSlice.actions.clearState());
+        dispatch(invitationsSlice.actions.clearState());
+        dispatch(chatRoomSlice.actions.clearState());
         dispatch(onLogOut());
     }
 

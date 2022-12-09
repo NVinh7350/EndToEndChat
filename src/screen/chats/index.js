@@ -6,7 +6,7 @@ import { colors, HEIGHT, WIDTH } from '../../utility';
 import CircleImage from '../../components/CircleImage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch, useSelector } from 'react-redux';
-import { chatsSelector, guestSelector, ownerSelector, statusSelector } from '../../redux/selector';
+import { allMessagesSelector, chatsSelector, guestSelector, ownerSelector, statusSelector } from '../../redux/selector';
 import { getAsyncStorage } from '../../asyncStorage';
 import fireStore from '@react-native-firebase/firestore'
 import {app} from '../../firebase/firebase-config'
@@ -15,6 +15,7 @@ import chatsSlice, { getChats } from './chatsSlice';
 import searchSlice, { setGuest } from '../search/searchSlice';
 import { getAllInvitations } from '../invitations/invitationsSlice';
 import { setOwner } from '../login/loginInputSlice';
+import chatRoomSlice, { getAllMessages } from '../chatRoom/chatRoomSlice';
 let navigations ;
 const HeaderComponent = ({navigation}) =>{
     const owner = useSelector(ownerSelector);
@@ -44,35 +45,18 @@ const HeaderComponent = ({navigation}) =>{
     )
 }
 
-const Chat = ({chat}) => {
-    const owner = useSelector(ownerSelector);
-    const [guestChat, setGuestChat] = useState();
-    const guest = useSelector(guestSelector);
+const Chat = ({chatRoom}) => {
     const dispatch = useDispatch();
-    useEffect(() => {
-        (async() => {
-            var guestChatId ;
-            chat?.members.map(e => { 
-                if( e != owner?.uid)
-                guestChatId = e;
-            });
-            const guestChatDB = await fireStore(app).collection('users').doc(guestChatId).get();
-            setGuestChat(guestChatDB.data());
-        })()
-    }, [])
-
-    const openChatRoom = () => {
-        if(guestChat) {
-            // dispatch(searchSlice.actions.setGuest(guestChat));
-            dispatch(setGuest(guestChat));
+    const openChatRoom = async() => {
+            dispatch(setGuest(chatRoom?.members?.guest));
+            dispatch(chatsSlice.actions.setChatRoom(chatRoom));
             navigations.navigate('ChatRoom')
-        }
     }
-
     return (
-        <ChatItem userName={guestChat?.userName}
-            lastMessage={chat?.lastMessage?.messageContent}
-            source={guestChat?.profileImg ? {uri: guestChat?.profileImg} : require('../../utility/image/profileImg.png')}
+        <ChatItem userName={chatRoom?.members?.guest?.userName}
+            lastMessage={chatRoom?.lastMessage?.messageContent == 'Hình ảnh mã hoá'? 'Hình ảnh mã hoá' : 'Tin nhắn mã hoá'}
+            timeMessage={chatRoom?.lastMessage?.messageTime}
+            source={chatRoom?.members?.guest?.profileImg ? {uri: chatRoom?.members?.guest?.profileImg} : require('../../utility/image/profileImg.png')}
             state={'Active'}
             onPress={() =>{ openChatRoom()}}
         ></ChatItem>
@@ -96,14 +80,13 @@ const Chats = ({navigation}) => {
             dispatch(getAllInvitations());
         });
         return () => subscriber();
-    }, [owner?.uid]);
-    
+    }, []);
     return (
         <View>
             <HeaderComponent navigation={navigation}/>
             <FlatList
             data={chats}
-            renderItem={({item})=><Chat chat={item}/>}
+            renderItem={({item})=><Chat chatRoom={item}/>}
             ></FlatList>
         </View>
     )

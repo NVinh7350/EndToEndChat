@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import chatRoomSlice from '../screen/chatRoom/chatRoomSlice';
 import chatsSlice from '../screen/chats/chatsSlice';
 import invitationsSlice from '../screen/invitations/invitationsSlice';
 import loginSlice from "../screen/login/loginInputSlice";
@@ -10,8 +11,12 @@ const store = configureStore({
     search: searchSlice.reducer,
     setting: settingSlice.reducer,
     chats: chatsSlice.reducer,
-    invitations: invitationsSlice.reducer
+    invitations: invitationsSlice.reducer,
+    chatRoom : chatRoomSlice.reducer,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+    immutableCheck: false,
+    serializableCheck: false,
+  })
 });
-
 export default store;

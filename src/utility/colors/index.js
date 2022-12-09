@@ -6,7 +6,7 @@ const colors = {
 
     GRAY_DARK : '#B0B0B0',
     GRAY_BLAND : '#C9CCD1',
-    GRAY_CLOUD : '#F0F0F0',
+    GRAY_CLOUD : '#CDD2D6',
 
     BLUE_DARK : '#1976F2',
     BLUE_BLAND : '#C7DFFF',

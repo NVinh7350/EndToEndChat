@@ -4,19 +4,24 @@ import { app } from "../../firebase/firebase-config";
 import fireStore from "@react-native-firebase/firestore";
 import { setAsyncStorage, clearAsyncStorage, getAsyncStorage } from "../../asyncStorage";
 
+const initialState = {
+    status: 'idle',
+    privateKey: '',
+    accountPassword: '',
+}
+
 const settingSlice = createSlice({
     name:'setting',
-    initialState:{
-        status: 'idle',
-        privateKey: '',
-        accountPassword: '',
-    },
+    initialState,
     reducers: {
         setStatus: (state, action) => {
             state.status = action.payload;
         },
         setPrivateKey: (state, action) => {
             state.privateKey == action.payload;
+        },
+        clearState: (state, action) => {
+            return initialState
         }
     },
     extraReducers:(buider) => {
@@ -31,7 +36,7 @@ const settingSlice = createSlice({
         })
         .addCase(setPrivateKey.rejected, (state, action) => {
             state.status = 'error';
-            console.log('err')
+            console.log('error', action.error);
         })
     },
 })

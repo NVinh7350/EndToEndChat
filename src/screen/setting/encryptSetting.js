@@ -12,8 +12,8 @@ import { getAsyncStorage } from '../../asyncStorage'
 import Loader from '../../components/Loader'
 const EncryptSetting = ({navigation}) => {
     const [showPW, setShowPW] = useState(true);
-    const [key, setKey] = useState('');
-    const [confirmKey, setConfirmKey] = useState('');
+    const [key, setKey] = useState('dev1dev1');
+    const [confirmKey, setConfirmKey] = useState('dev1dev1');
     const privateKey = useSelector(privateKeySelector);
     const settingStatus = useSelector(settingStatusSelector);
     const dispatch = useDispatch();
@@ -23,15 +23,7 @@ const EncryptSetting = ({navigation}) => {
         if(privateKeyStorage) {
             navigation.goBack();
         } else {
-            Alert.alert('Cảnh báo!', 'Chưa cài đặt khoá mã hoá', [
-                {
-                    text:'Vẫn thoát',
-                    onPress:()=> navigation.goBack()
-                },
-                { 
-                    text:'Huỷ',
-                }
-            ])
+            Alert.alert('Cảnh báo!', 'Chưa cài đặt khoá mã hoá')
         }
     }
     const handleSetKey = async() => {
@@ -55,6 +47,7 @@ const EncryptSetting = ({navigation}) => {
         if(settingStatus == 'success') {
             SimpleToast.show('Cài đặt thành công', 1000 )
             dispatch(settingSlice.actions.setStatus('idle'))
+            navigation.navigate('BottomTab')
         } else if (settingStatus == 'error') {
             SimpleToast.show('Cài đặt thất bại', 1000)
             dispatch(settingSlice.actions.setStatus('idle'))
@@ -76,6 +69,8 @@ const EncryptSetting = ({navigation}) => {
         </View>
         <View style={styles.containerBody}>
             <Text style={styles.textTitleSmall}>Khoá mã hoá </Text>
+            <Text style={styles.text}>{'-   Mỗi tin nhắn chỉ có thể mã hoá và giải mã bằng cùng một khoá \n'+
+                '-   Đảm bảo rằng bạn nhập khoá đúng để có thể đọc tin nhắn trước đó'}</Text>
             <InputField 
             containerStyle={{marginVertical: HEIGHT * 0.02, marginTop: HEIGHT * 0.05}}
             leftIcon={{
@@ -103,7 +98,7 @@ const EncryptSetting = ({navigation}) => {
             />
             <ButtonField
             containerStyle={{marginVertical: HEIGHT * 0.1}}
-            textContent={'Đăng ký'}
+            textContent={'Xác nhận'}
             onPress={() => handleSetKey()}
             />
         </View>
@@ -138,19 +133,20 @@ const styles = StyleSheet.create({
     containerBody:{
         // justifyContent:'center',
         alignItems:'center',
-        paddingTop:HEIGHT *0.1
+        paddingTop:HEIGHT *0.05
     },
     text:{
         width: WIDTH * 0.9,
-        textAlign:'right',
+        // textAlign:'right',
         marginVertical: HEIGHT * 0.02,
-        fontSize:16,
+        fontSize:18,
         color:colors.BLACK,
-        fontWeight:'bold'
+        lineHeight:23
+        // fontWeight:'bold'
     },
     textTitleSmall: {
 		width: WIDTH * 0.9,
-		marginBottom: HEIGHT * 0.02,
+		// marginBottom: HEIGHT * 0.02,
 		textAlign:'left',
 		fontSize: 25,
 		fontWeight: 'bold',

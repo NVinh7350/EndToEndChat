@@ -2,20 +2,26 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { app } from "../../firebase/firebase-config";
 import fireStore from "@react-native-firebase/firestore";
 import { getAsyncStorage } from "../../asyncStorage";
+import { caculatorPublicKey } from "../../encryption/DiffieHellman";
+
+const initialState = {
+    status:'idle',
+    allInvitations: [],
+    invitation: {}
+}
 
 const invitationsSlice = createSlice({
     name:'invitations',
-    initialState: {
-        status:'idle',
-        allInvitations: [],
-        invitation: {}
-    },
+    initialState,
     reducers:{
         setStatus: (state,action) => {
             state.status = action.payload;
         },
         setInvitation: (state, action) => {
             state.invitation = action.payload;
+        },
+        clearState: (state, action) => {
+            return initialState
         }
     },
     extraReducers:(buider) => {
@@ -23,8 +29,6 @@ const invitationsSlice = createSlice({
         .addCase(sendInvitation.fulfilled , (state, action) =>{
             state.status = 'success';
             state.invitation = action.payload; 
-            console.log('send ss');
-            console.log(action.payload);
         })
         .addCase(sendInvitation.pending, (state, action) =>{
             state.status = 'loading'
@@ -32,19 +36,17 @@ const invitationsSlice = createSlice({
         .addCase(sendInvitation.rejected, (state, action) =>{
             state.status = 'error';
             state.invitation = action.payload;
-            console.log('send Error', action.error.message)
         })
         .addCase(getAllInvitations.fulfilled , (state, action) =>{
-            state.status = 'success';
+            // state.status = 'success';
             state.allInvitations = action.payload; 
         })
         .addCase(getAllInvitations.pending, (state, action) =>{
-            state.status = 'loading'
+            // state.status = 'loading'
         })
         .addCase(getAllInvitations.rejected, (state, action) =>{
-            state.status = 'error';
+            // state.status = 'error';
             state.allInvitations = action.payload;
-            console.log('getAllInvitations',action.error.message)
         })
         .addCase(acceptInvitation.pending, (state, action) =>{
             state.status = 'loading';
@@ -54,7 +56,6 @@ const invitationsSlice = createSlice({
         })
         .addCase(acceptInvitation.rejected, (state, action) =>{
             state.status = 'error';
-            console.log('acceptInvitation', action.error.message);
         })
 
     }
@@ -66,7 +67,6 @@ export default invitationsSlice;
 export const getAllInvitations = createAsyncThunk('invitations/getAllInvitations', 
 async() => {
     const owner = JSON.parse(await getAsyncStorage('owner'));
-    console.log((owner?.invitations))
     const result = await Promise.all(Object.keys(owner?.invitations).map( async(element) =>{
         const invitationDB = await fireStore(app).collection('invitations').doc(element).get();
         const sentBy = await fireStore(app).collection('users').doc(invitationDB.data().sentBy).get();
@@ -86,12 +86,12 @@ async() => {
     const invitationId = fireStore(app).collection('invitation').doc().id;
     const timeSend = Date.now();
     const privateKey = await getAsyncStorage('privateKey');
-    const publicKey = privateKey;// Tính khoá công khai tại đây 
+    const publicKey = (caculatorPublicKey(privateKey)).toString();// Tính khoá công khai tại đây 
     const invitationData = {
         sentBy: owner.uid,
         receivedBy : guest.uid,
         publicKey: {
-          'UO6wqwixH6vEzePZ0TVZ' :  publicKey
+          [owner?.uid] :  publicKey
         },
         status: 'sent',
         time: timeSend,
@@ -110,11 +110,12 @@ async() => {
 export const acceptInvitation = createAsyncThunk('invitations/acceptInvitation', 
 async(invitation) => {
     const messageId = fireStore(app).collection('m').doc().id;
+    const chatId = fireStore(app).collection('chats').doc().id;
     const guestId = invitation?.sentBy?.uid;
     const ownerId = invitation?.receivedBy?.uid;
     const invitationId = invitation?.invitationId;
     const privateKey = await getAsyncStorage('privateKey');
-    const publicKey = privateKey;// Tính khoá công khai tại đây 
+    const publicKey = (caculatorPublicKey(privateKey)).toString();// Tính khoá công khai tại đây 
     const timeAccept = Date.now();
     await fireStore(app).collection('invitations').doc(invitationId).update({
         [`publicKey.${ownerId}`] : publicKey,
@@ -130,33 +131,35 @@ async(invitation) => {
     [`invitations.${invitationId}`] : timeAccept
     })
     const getPublicKey = await fireStore(app).collection('invitations').doc(invitationId).get();
-    const chatRoom = await fireStore(app).collection('chats').add({
+    
+    const chatRoom = await fireStore(app).collection('chats').doc(chatId).set({
     publicKey : getPublicKey.data().publicKey,
     lastMessage : {
         messageContent: 'Room has been created',
         messageTime: timeAccept,
-        recivedBy: guestId,
+        receivedBy: guestId,
         sentBy: ownerId
     },
+    chatId,
     members: [ownerId, guestId]
     });
     await fireStore(app).collection('users').doc(ownerId).update({
         // recivedInvitations : fireStore.FieldValue.arrayUnion(invitation.id)
-        [`chats.${chatRoom.id}`] : timeAccept
+        [`chats.${chatId}`] : timeAccept
     })
     await fireStore(app).collection('users').doc(guestId).update({
     // sentInvitations : fireStore.FieldValue.arrayUnion(invitation.id)
-        [`chats.${chatRoom.id}`] : timeAccept
+        [`chats.${chatId}`] : timeAccept
     })
-    await fireStore(app).collection('messages').doc(chatRoom.id).set({
-        [`${messageId}`] : {
-          messageContent: 'Room has been created',
-          messageTime: timeAccept,
-          recivedBy: guestId,
-          sentBy: ownerId,
-          publicKey : getPublicKey.data().publicKey,
-        }
-    })
+    // await fireStore(app).collection('messages').doc(chatId).set({
+    //     [`${messageId}`] : {
+    //       messageContent: 'Room has been created',
+    //       messageTime: timeAccept,
+    //       receivedBy: guestId,
+    //       sentBy: ownerId,
+    //       publicKey : getPublicKey.data().publicKey,
+    //     }
+    // })
     return getPublicKey.data().publicKey;
 }
 )

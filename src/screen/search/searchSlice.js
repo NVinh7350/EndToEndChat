@@ -3,14 +3,15 @@ import { app } from "../../firebase/firebase-config";
 import fireStore from "@react-native-firebase/firestore";
 import { getAsyncStorage, setAsyncStorage } from "../../asyncStorage";
 
+const initialState = {
+    getAllUserStatus: 'idle',
+    allUser: [],
+    searchData: '',
+    guest:{},
+}
 const searchSlice = createSlice({
     name:'search',
-    initialState: {
-        getAllUserStatus: 'idle',
-        allUser: [],
-        searchData: '',
-        guest:{},
-    },
+    initialState,
     reducers:{
         searchDataChage: (state,action) =>{
             state.searchData = action.payload;
@@ -21,6 +22,9 @@ const searchSlice = createSlice({
         // setGuest: (state, action) => {
         //     state.guest = action.payload;
         // }
+        clearState : (state, action) => {
+            return initialState
+        }
     },
     extraReducers:(buider) => {
         buider
@@ -86,9 +90,7 @@ async() => {
 
 export const setGuest = createAsyncThunk('search/setGuest',
 async(guest) => {
-    await setAsyncStorage('guest', JSON.stringify(guest)).then(data => {
-        console.log(data)
-    }).catch(err => console.log(err));
+    await setAsyncStorage('guest', JSON.stringify(guest));
     return guest;
 })
 

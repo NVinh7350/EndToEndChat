@@ -29,25 +29,18 @@ export const privateKeySelector = (state) => state.setting.privateKey;
 export const settingStatusSelector = (state) => state.setting.status;
 
 export const chatsSelector = (state) => state.chats.chats;
+export const chatRoomSelector = (state) => state.chats.chatRoom;
 export const checkFriendSelector = createSelector(
     chatsSelector, guestSelector,
     (chats, guest) => {
-        var result = false;
         if(!chats) {
             return false;
         }
         chats.forEach(e => {
-            if(result == false) {
-                e?.members.forEach(u => {
-                    if ( u === guest?.uid )
-                        {
-                            result = true;
-                            return;
-                        }
-                })
-            }
+            if(e?.members?.guest?.uid == guest?.uid)
+                return true
         });
-        return result;
+        return false;
     }
 )
 export const statusInvitationSelector = (state) => state.invitations.status;
@@ -72,13 +65,32 @@ export const receivedInvitationsSelector = createSelector(
     (invitations, owner) => {
         if(invitations) {
             const result = invitations.filter(e => {
-                console.log(e?.receivedBy?.uid)
                 return e?.receivedBy?.uid == owner?.uid && e?.status == 'sent'
             })
-            console.log(result);
             return result;
         } else {
             return []
         }
     }
 )
+
+export const allImagesSelector = (state) => state.chatRoom.allImages;
+export const selectedImagesSelector = (state) => state.chatRoom.selectedImages;
+export const textMessageSelector = (state) => state.chatRoom.textMessage;
+// export const allMessagesSelector = (state) => state.chatRoom.allMessages;
+export const allMessagesSelector = createSelector(
+    (state) => state.chatRoom.allMessages, ownerSelector,
+    (allMessages, owner) => {
+        if(allMessages) {
+            return allMessages.map(e => {
+                return {
+                    ...e,
+                    sentByOwner: e.sentBy == owner.uid
+                }
+            })
+        } else {
+            return []
+        }
+    }
+)
+export const statusSendSelector = (state) => state.chatRoom.statusSend;

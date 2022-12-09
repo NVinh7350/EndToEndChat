@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import { HEIGHT, WIDTH, colors } from '../../utility';
 import React from 'react'
 import CircleImage from '../CircleImage';
+import { getTimeAgo } from '../../utility/time';
 const handleMessage = (message) => {
     if (!message)
     return '';
@@ -44,9 +45,14 @@ const ChatItem = ({
                     
                     {
                         lastMessage ?
-                        <Text style={[ styles.textMedium, {fontWeight: border} ]}>
-                        {`${handleMessage(lastMessage)} ${timeMessage}`}
-                        </Text> :
+                        <View style={{flexDirection:'row'}}>
+                            <Text style={[ styles.textMedium, {fontWeight: border} ]}>
+                                {`${handleMessage(lastMessage)}`}
+                            </Text>
+                            <Text style={[ styles.textMedium, {fontWeight: border} ]}>
+                                {`${getTimeAgo(timeMessage)}`}
+                            </Text>
+                        </View> :
                         <View></View>
                     }
                 </View>
@@ -77,7 +83,7 @@ const styles = StyleSheet.create({
         color: 'black'
     },
     textMedium: {
-        width:WIDTH * 0.905 ,
+        width:WIDTH * 0.54,
         fontSize: 14,
         textAlignVertical: 'bottom',
         color: 'black',

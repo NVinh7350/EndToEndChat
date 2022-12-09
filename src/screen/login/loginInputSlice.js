@@ -3,18 +3,21 @@ import auth from '@react-native-firebase/auth'
 import { app } from "../../firebase/firebase-config";
 import fireStore from "@react-native-firebase/firestore";
 import { setAsyncStorage, clearAsyncStorage, getAsyncStorage } from "../../asyncStorage";
+
+const initialState = {
+    statusLogin: 'idle',
+    statusRegister: 'idle',
+    status: 'idle',
+    loginData: {
+        email:'',
+        password:'',
+    },
+    owner:{}
+}
+
 const loginSlice = createSlice({
     name:'login',
-    initialState:{
-        statusLogin: 'idle',
-        statusRegister: 'idle',
-        status: 'idle',
-        loginData: {
-            email:'',
-            password:'',
-        },
-        owner:{}
-    },
+    initialState,
     reducers: {
         addLoginData:(state, action) => {
             state.loginData = action.payload;
@@ -27,6 +30,9 @@ const loginSlice = createSlice({
         },
         setStatus : (state, action) => {
             state.status = action.payload
+        },
+        clearState: (state, action) => {
+            return initialState
         }
     },
     extraReducers:(buider) => {
@@ -41,6 +47,7 @@ const loginSlice = createSlice({
         .addCase(onLogin.rejected, (state, action) => {
             state.statusLogin = 'error';
             state.owner = action.payload;
+            console.log(action.error.message);
         })
         .addCase(onRegister.pending , (state, action) => {
             state.statusRegister = 'loading';
@@ -90,9 +97,7 @@ export const setOwner = createAsyncThunk(
 export const onLogin = createAsyncThunk(
     'login/onLogin',
     async (loginData) => {
-        const user = await auth(app).signInWithEmailAndPassword(loginData?.email, loginData?.password).catch(err =>{
-            console.log('err', err)
-        })
+        const user = await auth(app).signInWithEmailAndPassword(loginData?.email, loginData?.password)
         const getOwner = await fireStore(app).collection('users').doc(user.user.uid).get();
         await setAsyncStorage('owner', JSON.stringify(getOwner.data()));
         return getOwner.data();
@@ -102,9 +107,6 @@ export const onRegister = createAsyncThunk(
     'login/onRegister',
     async (loginData) => {
         const newUser = await auth(app).createUserWithEmailAndPassword(loginData?.email, loginData?.password)
-        .catch(er =>{
-            console.log(er)
-        })
         const addUser = await fireStore(app)
         .collection(`users`)
         .doc(newUser.user.uid)

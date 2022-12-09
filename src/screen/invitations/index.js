@@ -6,7 +6,7 @@ import { colors, HEIGHT, WIDTH } from '../../utility';
 import CircleImage from '../../components/CircleImage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useDispatch, useSelector } from 'react-redux';
-import { allInvitationsSelector, encryptKeySelector, encryptPasswordSelector, ownerSelector, receivedInvitationsSelector, statusInvitationSelector } from '../../redux/selector';
+import { allInvitationsSelector, encryptKeySelector, encryptPasswordSelector, ownerSelector, privateKeySelector, receivedInvitationsSelector, statusInvitationSelector } from '../../redux/selector';
 import { getAsyncStorage } from '../../asyncStorage';
 import fireStore from '@react-native-firebase/firestore'
 import {app} from '../../firebase/firebase-config'
@@ -48,8 +48,21 @@ const HeaderComponent = ({navigation}) =>{
 }
 const Invitation = ({invitation}) => {
     const dispatch = useDispatch();
-    const handleAccept = () => {
-        dispatch(acceptInvitation(invitation));
+    const handleAccept = async() => {
+        const privateKeyStorage = await getAsyncStorage('privateKey');
+        if(privateKeyStorage) {
+            dispatch(acceptInvitation(invitation));
+        } else {
+        Alert.alert('Lỗi!', 'Bạn chưa cài đặt khoá mã hoá', [
+            {
+                text:'Đi đến cài đặt',
+                onPress:()=> navigations.navigate('EncryptSetting')
+            },
+            { 
+                text:'Huỷ',
+            }
+        ])
+        }
     }
     const handleRefuse = () => {
 
@@ -60,7 +73,7 @@ const Invitation = ({invitation}) => {
     }
     return (
         <InvitationItem userName={invitation?.sentBy?.userName}
-        profileImg={{uri: invitation?.sentBy?.profileImg}}
+        profileImg={ invitation?.sentBy.profileImg ?{uri: invitation?.sentBy?.profileImg} : require('../../utility/image/profileImg.png')}
         onPressAccept={handleAccept}
         onPressRefuse={handleRefuse}
         onPressProfile={handleOpenProfile}
@@ -79,7 +92,7 @@ const Invitations = ({navigation}) => {
         } else if (statusInvitation == 'error') {
             dispatch(invitationsSlice.actions.setStatus('idle'));
         }
-    })
+    },[receivedInvitations])
   return (
     <View>
         <Loader status={statusInvitation}/>

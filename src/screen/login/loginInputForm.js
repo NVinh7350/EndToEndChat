@@ -59,7 +59,7 @@ const LoginInputForm = ({ navigation }) => {
 			} 
 		else if (statusLogin == 'success') {
 		dispath(loginSlice.actions.setStatusLogin('idle'));
-		navigation.navigate('BottomTab');
+		navigation.navigate('EncryptSetting');
 		}
     },[statusLogin, newLoginData])
     

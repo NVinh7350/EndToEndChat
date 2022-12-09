@@ -1,5 +1,8 @@
 package com.endtoendchat;
 import com.oblador.vectoricons.VectorIconsPackage;
+import com.reactnativecommunity.cameraroll.CameraRollPackage;
+import com.reactnativecompressor.CompressorPackage;
+import com.rnfs.RNFSPackage;
 import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
@@ -29,6 +32,9 @@ public class MainApplication extends Application implements ReactApplication {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
           new VectorIconsPackage();
+          new CameraRollPackage();
+          new CompressorPackage();
+          new RNFSPackage();
           return packages;
         }
 

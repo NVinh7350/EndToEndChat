@@ -39,7 +39,6 @@ export default function Profile({navigation}) {
     const privateKey = useSelector(privateKeySelector);
     const dispatch = useDispatch(settingSlice);
     navigations= navigation;
-    console.log('check',checkInvitaion)
     const handleOpenMessage = async() => {
             if(checkFriend) {
                 navigation.navigate('ChatRoom')
