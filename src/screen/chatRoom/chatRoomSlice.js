@@ -15,7 +15,8 @@ const initialState = {
     selectedImages : [],
     textMessage : '',
     allMessages: [],
-    statusSend : 'idle'
+    statusSend : 'idle',
+    selectedImage : {}
 }
 
 const chatRoomSlice = createSlice({
@@ -33,6 +34,9 @@ const chatRoomSlice = createSlice({
                     width: image.width
                 }]
             }
+        },
+        setSelectedImage : (state, action) => {
+            state.selectedImage = action.payload;
         },
         setTextMessage : (state, action) => {
             state.textMessage = action.payload;
@@ -131,7 +135,6 @@ async(dataToSend) => {
     const chatRoom = dataToSend.chatRoom;
     const textMessage = dataToSend.textMessage;
     const selectedImages = dataToSend.selectedImages;
-    console.log(selectedImages.length)
     const owner = dataToSend.owner;
     const guest = dataToSend.guest;
     const timeSend = Date.now();
@@ -204,7 +207,6 @@ async(allMessage) => {
     const guest = JSON.parse(await getAsyncStorage('guest'));
     const privateKey = await getAsyncStorage('privateKey');
     const ownerPublicKey = (caculatorPublicKey(privateKey)).toString();
-    // const allMessage = await fireStore(app).collection('messages').doc(chatRoom.chatId).get();
     if(!allMessage) {
         return []
     }
@@ -220,12 +222,18 @@ async(allMessage) => {
             const publicKey = e.publicKey[guest.uid];
             const encryptKey = (caculatorEncryptkey(privateKey,publicKey)).toString();
             const messageDecrypt = e?.imagesList?.length == 0 ?  AES_Decrypt(encryptKey, e.messageContent)._j.message: 'Hình ảnh mã hoá';
-            let   imageDecryptList = [];
+            let   imageDecryptList = e?.imagesList?.map(image => {
+                return {
+                    uri: AES_Decrypt(encryptKey, image.imageBase64)._j.message,
+                    height: image.height,
+                    width: image.width
+                };
+            });
             return {
                 ...e,
                 messageContent: messageDecrypt,
                 decrypt : true,
-
+                imagesList: imageDecryptList
             }
         }
     })
@@ -253,12 +261,18 @@ async(newMessage) => {
             const publicKey = newMessage.publicKey[guest.uid];
             const encryptKey = (caculatorEncryptkey(privateKey,publicKey)).toString();
             const messageDecrypt = newMessage?.imagesList?.length == 0 ?  AES_Decrypt(encryptKey, newMessage.messageContent)._j.message: 'Hình ảnh mã hoá';
-            let   imageDecryptList = [];
+            let   imageDecryptList = newMessage?.imagesList?.map(image => {
+                return {
+                    uri: AES_Decrypt(encryptKey, image.imageBase64)._j.message,
+                    height: image.height,
+                    width: image.width
+                };
+            });
             return {
                 ...newMessage,
                 messageContent: messageDecrypt,
                 decrypt : true,
-
+                imagesList: imageDecryptList
             }
         }
 })

@@ -11,10 +11,10 @@ import {  loginDataSelector, statusRegisterSelector, uidSelector } from '../../r
 import Loader from '../../components/Loader'
 const RegisterInputForm = ({ navigation }) => {
     const [registerData, setRegisterData] = useState({
-        userName:'Vinh2310',
-        email:'vanvinhqn2310@ail.com',
-        password:'123456',
-        comfirmPassword:'123456'
+        userName:'',
+        email:'',
+        password:'',
+        comfirmPassword:''
     });
     const [showPW, setShowPW] = useState(true);
     const statusRegister = useSelector(statusRegisterSelector);
@@ -56,17 +56,17 @@ const RegisterInputForm = ({ navigation }) => {
     
 
     useEffect(() =>{
-      if(statusRegister == 'error') {
-        Alert.alert('Lỗi!', 'Tài khoản đã tồn tại', [
-          {text: 'OK', onPress: () => dispath(loginSlice.actions.setStatusRegister('idle')), style: 'OK'}
-        ])
-      } else if (statusRegister == 'success') {
+      if (statusRegister == 'success') {
         dispath(loginSlice.actions.setStatusRegister('idle'));
 		Alert.alert('Đăng ký thành công', 'Bạn có muốn quay về đăng nhập?',[
 			{text:'Có', onPress: () => navigation.goBack()},
 			{text:'Không', onPress: () => {}}
 		])
-      }
+      } else if (statusRegister != 'idle' && statusRegister != 'loading') {
+		Alert.alert('Error!', statusRegister, [
+			{text: 'OK', onPress: () => dispath(loginSlice.actions.setStatusRegister('idle')), style: 'OK'}
+		  ])
+	  }
     }, [statusRegister])
 
     return (

@@ -12,26 +12,6 @@ import { app } from '../../firebase/firebase-config';
 import fireStore from '@react-native-firebase/firestore'
 import { sendInvitation } from '../invitations/invitationsSlice';
 let navigations;
-const Header = ({source}) => {
-
-    return (
-        <View style={ styles.containerHeader }>
-            <Image
-            style={ styles.backgroundImage}
-            source={{ uri: 'https://dohanews.co/wp-content/uploads/2022/05/aww7nqnvmdzd6brsvv2d-1-560x315.jpeg'}}
-            ></Image>
-            <Icon
-            style = {styles.buttonBack}
-                name='arrow-back-ios'
-                size={30}
-                color={colors.WHITE}
-                onPress= {()=> navigations.goBack()}
-            ></Icon>
-        </View>
-  )
-}
-
-
 export default function Profile({navigation}) {
     const guest = useSelector(guestSelector);
     const checkFriend = useSelector(checkFriendSelector);
@@ -40,7 +20,7 @@ export default function Profile({navigation}) {
     const dispatch = useDispatch(settingSlice);
     navigations= navigation;
     const handleOpenMessage = async() => {
-            if(checkFriend) {
+            if(checkFriend == true) {
                 navigation.navigate('ChatRoom')
             } else {
                 Alert.alert('Thông báo', `Gửi lời mời trò chuyện đến ${guest?.userName}?`);
@@ -51,10 +31,10 @@ export default function Profile({navigation}) {
         const privateKeyStorage = await getAsyncStorage('privateKey');
             
             if(privateKeyStorage) {
-                if(checkFriend) {
+                if(checkFriend == true) {
                     Alert.alert('Thông báo', `Bạn đã được kết nối với ${guest?.userName}`);
                 } else {
-                        if(checkInvitaion) {
+                        if(checkInvitaion != false) {
                             if(checkInvitaion == guest.uid){
                                 navigation.navigate('Invitations');
                             }
@@ -126,16 +106,16 @@ export default function Profile({navigation}) {
             </View>
             <Text 
                 style={ styles.textTitle }>
-                User information </Text>
+                Thông tin tài khoản </Text>
             <Text 
             style={ styles.textContent }>
-            Phone: *********** </Text>
+            Số điện thoại: {guest?.phone ? guest.phone : '**********'} </Text>
             <Text 
             style={ styles.textContent }>
-            Email: {guest?.email} </Text>
+            Địa chỉ email: {guest?.email} </Text>
             <Text 
             style={ styles.textContent }>
-            Date of birth :	24 / 06/ 1987 </Text>
+            Ngày sinh :	 {guest?.birthDay ? guest.birthDay : '**********'} </Text>
             </View>
         </View>
     )

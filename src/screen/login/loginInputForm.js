@@ -4,7 +4,7 @@ import { colors, HEIGHT, WIDTH } from '../../utility'
 import InputField from '../../components/InputField'
 import ButtonField from '../../components/ButtonField'
 import { useDispatch, useSelector } from 'react-redux'
-import loginSlice ,{ onLogin } from './loginInputSlice'
+import loginSlice ,{ loginWithCachedData, onLogin } from './loginInputSlice'
 import auth from '@react-native-firebase/auth'
 import fireStore from '@react-native-firebase/firestore'
 import { app } from '../../firebase/firebase-config'
@@ -13,7 +13,7 @@ import Loader from '../../components/Loader'
 import { clearAsyncStorage } from '../../asyncStorage'
 const LoginInputForm = ({ navigation }) => {
     const [loginData, setLoginData] = useState({
-        email:'vanvinhqn2310@ail.com',
+        email:'Bob@gmail.com',
         password:'123456'
     });
     const [showPW, setShowPW] = useState(true);
@@ -45,26 +45,25 @@ const LoginInputForm = ({ navigation }) => {
     }
 	
 	const handleLogin = async() => {
-		await clearAsyncStorage();
+		// await clearAsyncStorage();
 		if(checkLoginData(loginData)){
 			dispath(onLogin(loginData))
 		}
 	}
 
     useEffect(() => {
-		if(statusLogin == 'error') {
-			Alert.alert('Lỗi!', 'Vui lòng kiểm tra lại tài khoản', [
-				{text: 'OK', onPress: () => dispath(loginSlice.actions.setStatusLogin('idle')), style: 'OK'}
-			])
-			} 
-		else if (statusLogin == 'success') {
+		if (statusLogin == 'success') {
 		dispath(loginSlice.actions.setStatusLogin('idle'));
 		navigation.navigate('EncryptSetting');
+		} else if (statusLogin == 'success login with cache') {
+			dispath(loginSlice.actions.setStatusLogin('idle'));
+			navigation.navigate('BottomTab')
+		} else if (statusLogin != 'idle' && statusLogin != 'loading') {
+			Alert.alert('Error!', statusLogin, [
+				{text: 'OK', onPress: () => dispath(loginSlice.actions.setStatusLogin('idle')), style: 'OK'}
+			])
 		}
     },[statusLogin, newLoginData])
-    
-
-
     return (
     <View style={styles.container}>
 		<Loader status={statusLogin}/>

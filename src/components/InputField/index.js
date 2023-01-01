@@ -15,7 +15,8 @@ const InputField = ({
     textInputStyle,
     containerStyle,
     onFocus,
-    leftExpandedIcon
+    leftExpandedIcon,
+    editable
 }) => {
   return (
     <View style={[styles.container, containerStyle]}>
@@ -36,6 +37,7 @@ const InputField = ({
             value={value}
             onChangeText={onChangeText}
             placeholderTextColor={colors.GRAY_DARK}
+            editable = {editable}
         ></TextInput>
         <Icon style={{}}
             name={rightIcon?.name}

@@ -28,6 +28,7 @@ const invitationsSlice = createSlice({
         buider
         .addCase(sendInvitation.fulfilled , (state, action) =>{
             state.status = 'success';
+            console.log('send invitation', action.payload);
             state.invitation = action.payload; 
         })
         .addCase(sendInvitation.pending, (state, action) =>{
@@ -46,6 +47,7 @@ const invitationsSlice = createSlice({
         })
         .addCase(getAllInvitations.rejected, (state, action) =>{
             // state.status = 'error';
+            console.log('error', action.error.message)
             state.allInvitations = action.payload;
         })
         .addCase(acceptInvitation.pending, (state, action) =>{
@@ -55,6 +57,15 @@ const invitationsSlice = createSlice({
             state.status = 'success';
         })
         .addCase(acceptInvitation.rejected, (state, action) =>{
+            state.status = 'error';
+        })
+        .addCase(refuseInvitation.pending, (state, action) =>{
+            state.status = 'loading';
+        })
+        .addCase(refuseInvitation.fulfilled, (state, action) =>{
+            state.status = 'success';
+        })
+        .addCase(refuseInvitation.rejected, (state, action) =>{
             state.status = 'error';
         })
 
@@ -69,8 +80,8 @@ async() => {
     const owner = JSON.parse(await getAsyncStorage('owner'));
     const result = await Promise.all(Object.keys(owner?.invitations).map( async(element) =>{
         const invitationDB = await fireStore(app).collection('invitations').doc(element).get();
-        const sentBy = await fireStore(app).collection('users').doc(invitationDB.data().sentBy).get();
-        const receivedBy = await fireStore(app).collection('users').doc(invitationDB.data().receivedBy).get();
+        const sentBy = await fireStore(app).collection('users').doc(invitationDB.data()?.sentBy).get();
+        const receivedBy = await fireStore(app).collection('users').doc(invitationDB.data()?.receivedBy).get();
         return {...invitationDB.data(), ['sentBy']:sentBy.data(), ['receivedBy']: receivedBy.data()};
     }))
     const resultSort = result.sort((a, b) => {
@@ -105,6 +116,21 @@ async() => {
       [`invitations.${invitationId}`] : timeSend
     })
     return invitationData;
+})
+
+export const refuseInvitation = createAsyncThunk('invitations/refuseInvitation',
+async(invitation) => {
+    const owner = JSON.parse(await getAsyncStorage('owner'));
+    const guest = JSON.parse(await getAsyncStorage('guest'));
+    const invitationId = invitation?.invitationId;
+    await fireStore(app).collection('invitations').doc(invitationId).delete()
+    await fireStore(app).collection('users').doc(owner.uid).update({
+      [`invitations.${invitationId}`] : fireStore.FieldValue.delete()
+    })
+    await fireStore(app).collection('users').doc(guest.uid).update({
+      [`invitations.${invitationId}`] : fireStore.FieldValue.delete()
+    })
+    return invitation;
 })
 
 export const acceptInvitation = createAsyncThunk('invitations/acceptInvitation', 
@@ -144,22 +170,11 @@ async(invitation) => {
     members: [ownerId, guestId]
     });
     await fireStore(app).collection('users').doc(ownerId).update({
-        // recivedInvitations : fireStore.FieldValue.arrayUnion(invitation.id)
         [`chats.${chatId}`] : timeAccept
     })
     await fireStore(app).collection('users').doc(guestId).update({
-    // sentInvitations : fireStore.FieldValue.arrayUnion(invitation.id)
         [`chats.${chatId}`] : timeAccept
     })
-    // await fireStore(app).collection('messages').doc(chatId).set({
-    //     [`${messageId}`] : {
-    //       messageContent: 'Room has been created',
-    //       messageTime: timeAccept,
-    //       receivedBy: guestId,
-    //       sentBy: ownerId,
-    //       publicKey : getPublicKey.data().publicKey,
-    //     }
-    // })
     return getPublicKey.data().publicKey;
 }
 )

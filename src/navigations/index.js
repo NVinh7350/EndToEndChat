@@ -12,7 +12,10 @@ import Search from '../screen/search';
 import Profile from '../screen/profile';
 import Setting from '../screen/setting';
 import EncryptSetting from '../screen/setting/encryptSetting';
+import AccountSetting from '../screen/setting/accountSetting';
+import PasswordSetting from '../screen/setting/passwordSetting';
 import ChatRoom from '../screen/chatRoom';
+import ImageDetail from '../screen/imageDetail';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -62,8 +65,11 @@ function Index() {
         <Stack.Screen name="Seach" component={Search}/>
         <Stack.Screen name="Profile" component={Profile}/>
         <Stack.Screen name="Setting" component={Setting} screenOptions={{headerShown:true}}/>
-        <Stack.Screen name="EncryptSetting" component={EncryptSetting}/>
         <Stack.Screen name="ChatRoom" component={ChatRoom}/>
+        <Stack.Screen name="EncryptSetting" component={EncryptSetting}/>
+        <Stack.Screen name="AccountSetting" component={AccountSetting}/>
+        <Stack.Screen name="PasswordSetting" component={PasswordSetting}/>
+        <Stack.Screen name="ImageDetail" component={ImageDetail}/>
       </Stack.Navigator>
     </NavigationContainer>
   );

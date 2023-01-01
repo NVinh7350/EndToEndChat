@@ -14,7 +14,7 @@ import { setEncryptKey, setEncryptPassword } from '../setting/settingSlice';
 import PopUp from '../../components/PopUp';
 import InvitationItem from '../../components/InvitationItem';
 import { setGuest } from '../search/searchSlice';
-import invitationsSlice, { acceptInvitation } from './invitationsSlice';
+import invitationsSlice, { acceptInvitation, refuseInvitation } from './invitationsSlice';
 import Loader from '../../components/Loader';
 let navigations;
 
@@ -65,7 +65,7 @@ const Invitation = ({invitation}) => {
         }
     }
     const handleRefuse = () => {
-
+        dispatch(refuseInvitation(invitation))
     } 
     const handleOpenProfile = () => {
         // dispatch(setGuest(invitation?.sentBy));
@@ -84,6 +84,7 @@ const Invitations = ({navigation}) => {
     navigations = navigation;
     const allInvitations = useSelector(allInvitationsSelector);
     const receivedInvitations = useSelector(receivedInvitationsSelector);
+    console.log('invitation',allInvitations?.invitationId)
     const statusInvitation = useSelector(statusInvitationSelector);
     const dispatch = useDispatch();
     useEffect(() => {
@@ -96,6 +97,11 @@ const Invitations = ({navigation}) => {
   return (
     <View>
         <Loader status={statusInvitation}/>
+        {
+            receivedInvitations?.length == 0 ? 
+            <Text style={styles.titleEmpty}>Hiện tại không có lời mời</Text> :
+            null
+        }
         <HeaderComponent navigation={navigation}/>
         <FlatList
         data={receivedInvitations}
@@ -150,4 +156,13 @@ const styles = StyleSheet.create({
       backgroundColor:colors.WHITE,
       justifyContent:'space-evenly',
       alignItems:'center'
-  },})
+  },
+  titleEmpty : {
+    fontSize: 22,
+      color: colors.GRAY_DARK,
+      fontWeight: 'bold',
+      position:'absolute',
+      top: HEIGHT * 0.5,
+      alignSelf:'center'
+  }
+})

@@ -1,4 +1,4 @@
-import { Animated, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Alert, Animated, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { allMessagesSelector, chatRoomSelector, guestSelector, ownerSelector } from '../../redux/selector'
@@ -29,7 +29,7 @@ const Header = ({guest}) => {
             containerStyle={{width:WIDTH*0.5}}
             containerImageStyle={styles.avatar}
             imageStyle={{height:'100%'}}
-            source={{uri : guest.profileImg}}
+            source={guest?.profileImg ? {uri: guest?.profileImg} : require('../../utility/image/profileImg.png')}
             userName={guest.userName}
             />
         </View>
@@ -60,6 +60,7 @@ const Body = ({ motionFlatList}) => {
                     decrypt = {item?.decrypt}
                     imageList = {item?.imagesList}
                     publicKey = {item?.publicKey}
+                    navigation={navigations}
                     />)
             }
             }>
@@ -76,21 +77,26 @@ const motionFlatList = useRef((new Animated.Value(HEIGHT*0.8))).current;
 const dispatch = useDispatch();
 useEffect(() => {
     var firstLoad = true;
-    const subscriber = fireStore(app).collection('messages').doc(chatRoom.chatId).onSnapshot(sn => {
-        const result = Object.values(sn.data()).sort((a,b) => {
-            return a.messageTime - b.messageTime
+    try{
+        const subscriber = fireStore(app).collection('messages').doc(chatRoom.chatId).onSnapshot(sn => {
+            if (!sn.data()) {
+                return ;
+            }
+            const result = Object.values(sn.data()).sort((a,b) => {
+                return a.messageTime - b.messageTime
+            })
+            if(!firstLoad){
+                dispatch(getNewMessage(result.pop()))
+            }
+            else{
+                dispatch(getAllMessages(result))
+                firstLoad = false
+            }
         })
-        if(!firstLoad){
-            console.log('get new')
-            dispatch(getNewMessage(result.pop()))
-        }
-        else{
-            console.log('get All')
-            dispatch(getAllMessages(result))
-            firstLoad = false
-        }
-    })
-    return () => subscriber();
+        return () => subscriber();
+    } catch(err){
+        console.log(err)
+    }
 },[])
 return (
     <View style={styles.container}>
@@ -125,7 +131,7 @@ const styles = StyleSheet.create({
     containerBody: {
         height: HEIGHT * 0.756,
         width: WIDTH,
-        backgroundColor: colors.WHITE,
+        // backgroundColor: colors.GRAY_DARK,
     },
     containerTail: {
         height: HEIGHT * 0.065,

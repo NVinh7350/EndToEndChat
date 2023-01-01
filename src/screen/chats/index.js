@@ -84,6 +84,11 @@ const Chats = ({navigation}) => {
     return (
         <View>
             <HeaderComponent navigation={navigation}/>
+            {
+                !chats ? 
+                <Text style={styles.titleEmpty}>Hiện tại không có đoạn hội thoại nào</Text> :
+                <Text></Text>
+            }   
             <FlatList
             data={chats}
             renderItem={({item})=><Chat chatRoom={item}/>}
@@ -146,5 +151,13 @@ const styles = StyleSheet.create({
         borderWidth:1,
         elevation:4,
         borderRadius:20
+    },
+    titleEmpty : {
+        fontSize: 22,
+        color: colors.GRAY_DARK,
+        fontWeight: 'bold',
+        position:'absolute',
+        top: HEIGHT * 0.5,
+        alignSelf:'center'
     }
 })

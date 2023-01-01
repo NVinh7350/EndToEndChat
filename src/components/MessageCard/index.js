@@ -11,45 +11,16 @@ let key ;
 let width;
 let height;
 let lengthList;
+let navigations;
 
-const ImageItem = ({publicKey,item, index}) => {
-    // var rowCurrent = Math.ceil((index + 1) / numColumns);
-    // var columnCurrent = Math.ceil((index + 1) % numColumns);
-    width = item.width /5 || 100;
-    height = item.height /5|| 100;
-    const [base64, setBase64] = useState('');
-    useEffect(()=>{
-        (async() => {
-                const owner = JSON.parse(await getAsyncStorage('owner'));
-                const guest = JSON.parse(await getAsyncStorage('guest'));
-                const privateKey = await getAsyncStorage('privateKey');
-                const ownerPublicKey = (caculatorPublicKey(privateKey)).toString();
-                if( ownerPublicKey != publicKey[owner.uid]) {
-                    console.log('Khac key')
-                } else
-                {
-                    const encryptKey = (caculatorEncryptkey(privateKey,publicKey[owner.uid])).toString();
-                    const imageDecrypt = await AES_Decrypt(encryptKey, item.imageBase64)._j.message;
-                    setBase64(imageDecrypt)
-                }
-            })()}, [])
+const ImageItem = ({item}) => {
     return (
-        <TouchableWithoutFeedback onPress={()=>{}}>
-
-            {
-                base64 ? 
-                <Image  style={{width:width, height: height, maxHeight:HEIGHT*0.5 , maxWidth:WIDTH*0.5, margin:1
+        <TouchableWithoutFeedback onPress={()=>{navigations.navigate('ImageDetail',{item:item})}}>
+                <Image  style={{width:250, height: 150, margin:1
                     , borderRadius:  15 
                     , borderWidth:1}} 
-                source={{uri: base64 }}
+                source={{uri: item?.uri }}
                 ></Image>
-                :
-                <View style={{width:width, height: height, maxHeight:HEIGHT*0.5 , maxWidth:WIDTH*0.5, margin:1
-                    ,borderRadius:15
-                    , borderWidth:1
-                }} >
-                </View>
-            }
         </TouchableWithoutFeedback>
     )
 }
@@ -61,9 +32,11 @@ export default MessageCard = (
         messageTime,
         imageList,
         decrypt,
-        publicKey
+        publicKey,
+        navigation
     }
 ) => {
+    navigations = navigation;
     const beginMotion = useRef(new Animated.Value(0)).current;
     const animatedShowTime = (motion, value, duration) => {
         Animated.timing(
@@ -84,30 +57,6 @@ export default MessageCard = (
         }
     },[showTime])
 
-    // lengthList = imageList ? Object.values(imageList).length :0 ;
-    // switch(lengthList){
-    //     case 1:
-    //         width = imageList[0]?.width /5 || 100;
-    //         height = imageList[0]?.height /5|| 100;
-    //         numColumns = 1;
-    //         key = 1;
-    //         break;
-    //     case 2:
-    //     case 4:
-    //         numColumns = 2;
-    //         width = WIDTH * 0.6 /2;
-    //         key = 2;
-    //         height = width;
-    //         break;
-    //     case 3:
-    //     default:
-    //         numColumns = 3;
-    //         width = WIDTH * 0.6 /3;
-    //         key = 3;
-    //         height = width;
-    //         break;
-    // }
-    // numRows = Math.ceil(lengthList / numColumns);
     
     const customStyle = {
         view : 

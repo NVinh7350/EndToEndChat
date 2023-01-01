@@ -10,30 +10,32 @@ const ButtonField = ({
     buttonStyle,
     containerStyle,
     onPress,
-    disabled
+    disabled,
+    loader
 }) => {
   return (
-    // <View style={[styles.container, containerStyle]}>
         <TouchableOpacity style={[styles.container, containerStyle]}
         onPress={onPress}
         disabled={disabled}
         >
         <View style={[styles.insideContainer, buttonStyle]}>
-            {icon ? 
-            <Icon style={[styles.icon, iconStyle]}
-                name={icon?.name}
-                size={icon?.size ? icon?.size: 20 }
-                color={icon?.color ? icon?.color : 'gray'}
-            ></Icon>
-            :
-            <></>}
+            {   icon ? 
+                loader ? 
+                    loader:
+                    <Icon style={[styles.icon, iconStyle]}
+                        name={icon?.name}
+                        size={icon?.size ? icon?.size: 20 }
+                        color={icon?.color ? icon?.color : 'gray'}
+                    ></Icon>
+                :
+                <></>
+            }
             <Text style={[styles.textInput, textStyle]}
             >
                 {textContent}
             </Text>
         </View>
         </TouchableOpacity>
-    // </View>
   )
 }
 
@@ -60,6 +62,6 @@ const styles = StyleSheet.create({
         
     },
     icon:{
-        marginHorizontal:WIDTH * 0.04
+        marginRight:WIDTH * 0.05
     }
 })

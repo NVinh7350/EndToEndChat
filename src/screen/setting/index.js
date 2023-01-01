@@ -20,14 +20,14 @@ const Setting = ({navigation}) => {
     const dispatch = useDispatch();
     const statusLogOut = useSelector(statusLoginSelector);
     const addAvatar = () =>{
-
+        Alert.alert('oke', 'hihi')
     }
     const openInforUser = () => {
-
+        navigation.navigate('AccountSetting');
     }
 
     const openPasswordAccount = () => {
-
+        navigation.navigate('PasswordSetting');
     }
 
     const openPasswordEncrypt = () => {
@@ -46,7 +46,6 @@ const Setting = ({navigation}) => {
 
     useEffect(()=>{
         if(statusLogOut == 'success'){
-            console.log('ss')
             dispatch(loginSlice.actions.setStatusLogin('idle'));
             navigation.navigate('Login');
         } else if (statusLogOut == 'error') {
@@ -74,17 +73,10 @@ const Setting = ({navigation}) => {
                 containerStyle={styles.avatar}
                 source={owner?.profileImg ? {uri: owner?.profileImg} : require('../../utility/image/profileImg.png')}
                 ></CircleImage>
-                <View style={styles.iconCamera}>
-                    <Icon
-                    name='camera-alt'
-                    size={25}
-                    onPress={()=>{addAvatar()}}
-                    ></Icon>
-                </View>
                 <Text style={[styles.textTitle, ]}>{owner?.userName}</Text>
             </View>
             <TouchableOpacity style={styles.buttonItem}
-            onPress={()=>{addAvatar()}}
+            onPress={()=>{openInforUser()}}
             >
                 <View style={styles.containerItem}>
                 <View style={[styles.iconItem, {backgroundColor:colors.BLUE_DARK}]}>
@@ -112,7 +104,7 @@ const Setting = ({navigation}) => {
             </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.buttonItem}
-            onPress={()=>{addAvatar()}}
+            onPress={()=>{openPasswordAccount()}}
             >
                 <View style={styles.containerItem}>
                     <View style={[styles.iconItem, {backgroundColor:colors.PURPLE}]}>

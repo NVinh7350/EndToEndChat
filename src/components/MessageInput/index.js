@@ -1,5 +1,5 @@
 import { useEffect, useState , useRef} from "react";
-import { StyleSheet , Dimensions, TextInput, View, Alert, Keyboard, Modal, Text, Animated, BackHandler, FlatList, ActivityIndicator} from "react-native";
+import { StyleSheet , Dimensions, TextInput, View, Alert, Keyboard, Modal, Text, Animated, BackHandler, FlatList, ActivityIndicator, PermissionsAndroid} from "react-native";
 import { colors, WIDTH, HEIGHT } from "../../utility";
 import ButtonField from "../ButtonField";
 import FieldInput from "../InputField";
@@ -10,7 +10,8 @@ import IconF from "react-native-vector-icons/FontAwesome"
 import { useDispatch, useSelector } from "react-redux";
 import { chatRoomSelector, guestSelector, ownerSelector, privateKeySelector, selectedImagesSelector, statusSendSelector, textMessageSelector } from "../../redux/selector";
 import chatRoomSlice, { sendMessage } from "../../screen/chatRoom/chatRoomSlice";
-import { Image} from 'react-native-compressor'
+import { launchCamera } from "react-native-image-picker";
+import { useCameraRoll, CameraRoll } from "@react-native-camera-roll/camera-roll";
 const fs = require('react-native-fs')
 const BUTTON_SIZE = WIDTH*0.08;
 const TEXT_INPUT_OPEN = WIDTH * 0.75;
@@ -33,6 +34,9 @@ const MessageInput = ({
     const owner = useSelector(ownerSelector);
     const guest = useSelector(guestSelector);
     const privateKey = useSelector(privateKeySelector);
+    const [photos, getPhotos, save] = useCameraRoll();
+
+
     const handleSend = async() => {
         const dataToSend = {
             chatRoom : chatRoom,
@@ -123,6 +127,29 @@ const MessageInput = ({
             return !pre;
         })
     }
+
+    async function hasAndroidPermission() {
+        const permission = PermissionsAndroid.PERMISSIONS.CAMERA;
+      
+        const hasPermission = await PermissionsAndroid.check(permission);
+        if (hasPermission) {
+          return true;
+        }
+      
+        const status = await PermissionsAndroid.request(permission);
+        return status === 'granted';
+    }
+
+    const handlePressCamera = async() => {
+        if (Platform.OS === "android" && !(await hasAndroidPermission())) {
+            return;
+        }
+        const result = await launchCamera({
+            saveToPhotos: true,
+            mediaType: 'photo'
+        });
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.containerInput}>
@@ -140,7 +167,7 @@ const MessageInput = ({
                         visible ? 
                         <Icon 
                         name="camera"
-                        onPress={() => handleHiden()}
+                        onPress={() => handlePressCamera()}
                         style= {styles.button}
                         size={27}
                         color={colors.BLUE_DARK}
@@ -192,7 +219,7 @@ const MessageInput = ({
                 bottomSheetMinHeight= {HEIGHT *0.45}
                 bottomSheetMaxHeight={HEIGHT}
                 props = {
-                    <ImageGallery/>
+                    <ImageGallery multipleSelect={true}/>
                 }
                 />
             </Animated.View>

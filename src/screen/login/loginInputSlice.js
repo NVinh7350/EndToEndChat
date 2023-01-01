@@ -7,6 +7,7 @@ import { setAsyncStorage, clearAsyncStorage, getAsyncStorage } from "../../async
 const initialState = {
     statusLogin: 'idle',
     statusRegister: 'idle',
+    statusUpdateOwner: 'idle',
     status: 'idle',
     loginData: {
         email:'',
@@ -33,7 +34,10 @@ const loginSlice = createSlice({
         },
         clearState: (state, action) => {
             return initialState
-        }
+        },
+        setStatusUpdateOwner:(state, action) => {
+            state.statusUpdateOwner = action.payload;
+        },
     },
     extraReducers:(buider) => {
         buider
@@ -45,9 +49,8 @@ const loginSlice = createSlice({
             state.statusLogin = 'success';
         })
         .addCase(onLogin.rejected, (state, action) => {
-            state.statusLogin = 'error';
+            state.statusLogin = action.error.message;
             state.owner = action.payload;
-            console.log(action.error.message);
         })
         .addCase(onRegister.pending , (state, action) => {
             state.statusRegister = 'loading';
@@ -57,7 +60,7 @@ const loginSlice = createSlice({
             state.statusRegister = 'success';
         })
         .addCase(onRegister.rejected, (state, action) => {
-            state.statusRegister = 'error';
+            state.statusRegister = action.error.message;
             state.loginData = action.payload;
         })
         .addCase(onLogOut.pending , (state, action) => {
@@ -82,6 +85,18 @@ const loginSlice = createSlice({
             state.status = 'error';
             state.owner = action.payload;
         })
+        .addCase(updateOwnerData.pending , (state, action) => {
+            state.statusUpdateOwner = 'loading';
+        })
+        .addCase(updateOwnerData.fulfilled, (state, action) => {
+            state.owner = action.payload;
+            state.statusUpdateOwner = 'success';
+            console.log('update success')
+        })
+        .addCase(updateOwnerData.rejected, (state, action) => {
+            state.statusUpdateOwner = 'error';
+            state.owner = action.payload;
+        })
     },
 })
 export default loginSlice;
@@ -103,6 +118,26 @@ export const onLogin = createAsyncThunk(
         return getOwner.data();
     }
     )
+
+export const updateOwnerData = createAsyncThunk(
+    'login/updateOwnerData',
+    async (ownerData) => {
+        console.log(ownerData)
+        const addUser = await fireStore(app)
+        .collection(`users`)
+        .doc(ownerData.uid)
+        .update({
+            userName: ownerData?.userName,
+            email: ownerData?.email,
+            phone: ownerData?.phone,
+            birthDay : ownerData?.birthDay,
+            profileImg: ownerData?.profileImg
+        })
+        const getOwner = await fireStore(app).collection('users').doc(ownerData.uid).get();
+        await setAsyncStorage('owner', JSON.stringify(getOwner.data()));
+        return getOwner.data();
+})
+
 export const onRegister = createAsyncThunk(
     'login/onRegister',
     async (loginData) => {
@@ -114,7 +149,9 @@ export const onRegister = createAsyncThunk(
             uid: newUser.user.uid,
             userName: loginData?.userName,
             email: loginData?.email,
-            profileImg:''
+            profileImg:'',
+            phone:'',
+            birthDay : ''
         })
   
         return loginData;

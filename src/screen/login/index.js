@@ -11,29 +11,10 @@ import { caculatorPublicKey } from '../../encryption/DiffieHellman'
 import { ca } from '../../../test'
 import { Image } from 'react-native-compressor'
 const Login = ({ navigation }) => {
-  const [images, setImage] = useState();
-  const send = async() => {
-    const c = await Image.compress('file:///storage/emulated/0/Pictures/splash.png', {
-      compressionMethod: 'auto',
-      returnableOutputType:'base64'
-      });
-    setImage(`data:image/jpeg;base64,${c}`);
-    console.log(c)
-  }
   return (
     <View style={styles.container}>
       <LoginHeader/>
       <LoginInputForm navigation= {navigation}/>
-      {/* <ImageBackground style={{height:100, width:100}} source={{uri: images}}></ImageBackground> */}
-      {/* <ImageGallery choose={a} setChoose={setA}/> */}
-      {/* <TouchableOpacity onPress={() => send()}><Text>Send</Text></TouchableOpacity> */}
-      {/* <TouchableOpacity onPress={() => accept()}><Text>Accpet</Text></TouchableOpacity>
-      <TouchableOpacity onPress={() => refuse()}><Text>Refuse</Text></TouchableOpacity>
-      <FlatList
-      inverted={true}
-      data={list}
-      renderItem={({item}) => <Text style={{fontSize:50}}>{item?.content}</Text>}
-      ></FlatList> */}
     </View>
   )
 }

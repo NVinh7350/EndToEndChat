@@ -8,6 +8,7 @@ const initialState = {
     status: 'idle',
     privateKey: '',
     accountPassword: '',
+    statusPassword : 'idle'
 }
 
 const settingSlice = createSlice({
@@ -22,6 +23,9 @@ const settingSlice = createSlice({
         },
         clearState: (state, action) => {
             return initialState
+        },
+        setStatusPassword : (state, action) => {
+            state.statusPassword == action.payload;
         }
     },
     extraReducers:(buider) => {
@@ -31,12 +35,20 @@ const settingSlice = createSlice({
         })
         .addCase(setPrivateKey.fulfilled, (state, action) => {
             state.privateKey = action.payload;
-            console.log('ss')
             state.status = 'success';
         })
         .addCase(setPrivateKey.rejected, (state, action) => {
             state.status = 'error';
             console.log('error', action.error);
+        })
+        .addCase(changePassword.rejected, (state, action) => {
+            state.statusPassword = 'error';
+        })
+        .addCase(changePassword.fulfilled, (state, action) => {
+            state.statusPassword = 'success';
+        })
+        .addCase(changePassword.pending, (state, action) => {
+            state.statusPassword = 'loading';
         })
     },
 })
@@ -46,5 +58,17 @@ export const setPrivateKey = createAsyncThunk(
     async (key) => {
         await setAsyncStorage('privateKey', key);
         return key;
+    }
+)
+
+export const changePassword = createAsyncThunk(
+    'setting/changePassword' ,
+    async (password) => {
+        console.log(password.oldPassword)
+        const owner =JSON.parse(await getAsyncStorage('owner'))
+        const checkOwner = (await auth(app).signInWithEmailAndPassword(auth(app).currentUser.email, password.oldPassword)).user.uid
+        if (owner.uid == checkOwner) {
+            await auth(app).currentUser.updatePassword(password.newPassword)
+        }
     }
 )

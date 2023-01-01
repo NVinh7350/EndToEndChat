@@ -5,6 +5,7 @@ export const statusSelector = (state) => state.login.status;
 export const statusRegisterSelector = (state) => state.login.statusRegister;
 export const statusLoginSelector = (state) => state.login.statusLogin;
 export const loginDataSelector = (state) => state.login.loginData;
+export const statusUpdateOwnerSelector = (state) => state.login.statusUpdateOwner;
 
 export const searchDataSelector = (state) => state.search.searchData;
 export const getAllUserStatusSelector = (state) => state.search.getAllUserStatus;
@@ -27,7 +28,7 @@ export const searchedUserListSelector = createSelector(
 
 export const privateKeySelector = (state) => state.setting.privateKey;
 export const settingStatusSelector = (state) => state.setting.status;
-
+export const passwordStatusSelector = (state) => state.setting.statusPassword;
 export const chatsSelector = (state) => state.chats.chats;
 export const chatRoomSelector = (state) => state.chats.chatRoom;
 export const checkFriendSelector = createSelector(
@@ -36,11 +37,17 @@ export const checkFriendSelector = createSelector(
         if(!chats) {
             return false;
         }
+        var result = 'false'
         chats.forEach(e => {
-            if(e?.members?.guest?.uid == guest?.uid)
-                return true
+            if( result == true) {
+                return result
+            }
+            if(e?.members?.guest?.uid == guest?.uid) {
+                result = true
+            }
         });
-        return false;
+        console.log('result',result)
+        return result;
     }
 )
 export const statusInvitationSelector = (state) => state.invitations.status;
@@ -76,6 +83,7 @@ export const receivedInvitationsSelector = createSelector(
 
 export const allImagesSelector = (state) => state.chatRoom.allImages;
 export const selectedImagesSelector = (state) => state.chatRoom.selectedImages;
+export const selectedImageSelector = (state) => state.chatRoom.selectedImage;
 export const textMessageSelector = (state) => state.chatRoom.textMessage;
 // export const allMessagesSelector = (state) => state.chatRoom.allMessages;
 export const allMessagesSelector = createSelector(

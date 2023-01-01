@@ -12,8 +12,8 @@ import { getAsyncStorage } from '../../asyncStorage'
 import Loader from '../../components/Loader'
 const EncryptSetting = ({navigation}) => {
     const [showPW, setShowPW] = useState(true);
-    const [key, setKey] = useState('dev1dev1');
-    const [confirmKey, setConfirmKey] = useState('dev1dev1');
+    const [key, setKey] = useState('');
+    const [confirmKey, setConfirmKey] = useState('');
     const privateKey = useSelector(privateKeySelector);
     const settingStatus = useSelector(settingStatusSelector);
     const dispatch = useDispatch();
@@ -21,7 +21,7 @@ const EncryptSetting = ({navigation}) => {
     const handleBack = async() => {
         const privateKeyStorage = await getAsyncStorage('privateKey');
         if(privateKeyStorage) {
-            navigation.goBack();
+            navigation.navigate('Setting')
         } else {
             Alert.alert('Cảnh báo!', 'Chưa cài đặt khoá mã hoá')
         }
